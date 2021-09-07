@@ -1,0 +1,79 @@
+
+from grovepi import *
+import time
+import grovepi
+import datetime
+
+
+light_sensor = 2
+Water_pin = 3
+Lamp_pin = 2
+Light_pin = 5
+
+
+light_threshold = 450  
+
+pinMode(light_sensor,"INPUT")                  
+pinMode(Light_pin,"OUTPUT")
+pinMode(Water_pin,"OUTPUT")
+pinMode(Lamp_pin,"OUTPUT")
+
+
+lampmode = 0
+
+def waterplant(now):
+    digitalWrite(Water_pin, 1)
+    digitalWrite(Light_pin, 1)
+    print ("Dispensing Water")
+    time.sleep (55)
+    digitalWrite(Water_pin, 0)
+    digitalWrite(Light_pin, 0)
+    print ("Watering Done")
+
+
+while True:
+    try:
+        now = datetime.datetime.now().strftime("%H:%M")
+       
+        if now == "15:00" or now == "4:00":
+            waterplant(now)
+           
+        else :
+            digitalWrite(Water_pin, 0)
+        light_sensor_value = grovepi.analogRead(light_sensor)
+        print ("Light Sensor Value", light_sensor_value)
+       
+       
+        if light_sensor_value < light_threshold:
+            # turn Lamp on
+            now = datetime.datetime.now().strftime("%H:%M")
+
+            if lampmode == 0:
+                print("turning lamp on ")
+                digitalWrite(Lamp_pin,1)
+                lampmode = 1
+            else:
+                print("Problem with lamp")
+        else:
+            # turn Lamp off
+            now = datetime.datetime.now().strftime("%H:%M")
+            if now >= "6:00" and now <= "22:00":
+                print("turning Lamp off", light_sensor_value)
+                digitalWrite(Lamp_pin,0)
+                lampmode = 0
+            elif lampmode == 0:
+                print("Lamp will remain off", now)
+            elif lampmode == 1:
+                print("Lamp will remain on", now)
+        time.sleep (60)
+       
+    except KeyboardInterrupt:
+        print("Emer Off")
+        digitalWrite(Lamp_pin, 0)
+        digitalWrite(Water_pin, 0)
+        digitalWrite(Light_pin, 0)
+        break
+    except TypeError:
+        print("Error")
+    except IOError:
+        print("Error") 
